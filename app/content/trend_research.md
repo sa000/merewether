@@ -1,0 +1,1 @@
+Click one of these examples to see how I would approach market research. Claude searches the public web, collects the news and reports that explain the move, and returns a research brief with inline citations — the same shape as a research note an analyst might pull together manually.

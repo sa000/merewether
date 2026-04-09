@@ -14,6 +14,7 @@ import streamlit as st
 
 from app import trend_analyst
 from app.sections import require_api_key
+from app.sections.narrative import render_content
 from app.style import (
     ACCENT,
     BORDER,
@@ -37,22 +38,6 @@ _PRESETS = [
         "end": date(2022, 7, 1),
     },
 ]
-
-
-def _intro() -> None:
-    st.markdown(
-        f"""
-        <p style="color: {TEXT_PRIMARY}; font-size: 17px; line-height: 1.75;
-                  margin: 0 0 1rem 0;">
-            Click one of these examples. Claude searches the public web,
-            collects the news and reports that explain the move, and
-            returns a research brief with inline citations — the same
-            shape as a research note an analyst might pull together
-            manually.
-        </p>
-        """,
-        unsafe_allow_html=True,
-    )
 
 
 def _render_presets() -> None:
@@ -140,7 +125,7 @@ def _render_result(result: dict) -> None:
 
 
 def render() -> None:
-    _intro()
+    render_content("trend_research.md")
 
     # Pop the auto-run flag set by a preset button click on the previous run.
     auto_run = st.session_state.pop("trend_auto_run", False)

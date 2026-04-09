@@ -17,6 +17,27 @@ from app.style import BORDER_SUBTLE, TEXT_FAINT
 _CONTENT_DIR = Path(__file__).resolve().parents[1] / "content"
 
 
+def render_content(filename: str) -> None:
+    """Read and render a markdown file from app/content/ with auto-refresh.
+
+    Public function for any section to use. When the file is edited and saved,
+    the app automatically updates on next page interaction.
+    """
+    path = _CONTENT_DIR / filename
+    if not path.exists():
+        _placeholder_block(f"Missing content file: {filename}")
+        return
+
+    # Include file mtime in cache key; when file changes, cache is invalidated
+    try:
+        file_mtime = path.stat().st_mtime
+    except OSError:
+        file_mtime = 0
+
+    text = _read_markdown_cached(filename, file_mtime)
+    st.markdown(text)
+
+
 @st.cache_data(show_spinner=False)
 def _read_markdown_cached(filename: str, file_mtime: float) -> str:
     """Read markdown file. Cache key includes mtime for auto-refresh on edits.

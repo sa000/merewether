@@ -13,6 +13,7 @@ import streamlit as st
 from app import data_chat
 from app.data_sources import INVENTORY, build_inventory_text
 from app.sections import require_api_key
+from app.sections.narrative import render_content
 from app.style import (
     ACCENT,
     ACCENT_DIM,
@@ -31,23 +32,6 @@ _PRESET_QUESTIONS = [
     "What's the difference between the equity and futures data here?",
     "What is the size of this data and the date range?",
 ]
-
-
-def _intro() -> None:
-    st.markdown(
-        f"""
-        <p style="color: {TEXT_PRIMARY}; font-size: 16px; line-height: 1.7;
-                  margin: 0 0 1rem 0;">
-            Ask Claude what data is available in this app. The model is
-            grounded only on the inventory below — it cannot make up
-            sources that don't exist. This is a stand-in for the kind
-            of internal Q&A I would build over Merewether's actual data
-            catalog: an analyst should never have to remember where a
-            field lives.
-        </p>
-        """,
-        unsafe_allow_html=True,
-    )
 
 
 def _render_preset_buttons() -> None:
@@ -97,7 +81,7 @@ def _render_answer(result: dict) -> None:
 
 
 def render() -> None:
-    _intro()
+    render_content("data_chat.md")
     api_key = require_api_key()
 
     # Pop the auto-run flag set by a preset button click on the previous run.

@@ -1,0 +1,1 @@
+Ask questions about the data available in this app. The model is grounded only on the sources listed below — it cannot make up data that doesn't exist. This is a stand-in for the kind of internal data dictionary I would build over Merewether's actual data catalog, so analysts never have to remember where a field lives or what data is available.
