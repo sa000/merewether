@@ -30,7 +30,7 @@ _DEFAULT_QUESTION = "What data is available in this app, and what kind of questi
 _PRESET_QUESTIONS = [
     "Which sources cover macro economic data?",
     "What's the difference between the equity and futures data here?",
-    "What is the size of this data and the date range?",
+    "What data is available in this app and how many records are there?",
 ]
 
 
