@@ -1,8 +1,8 @@
 """Narrative section renderers.
 
 Each function reads a markdown file from ``app/content/`` and renders
-it inside the current Streamlit container. Files are watched automatically—
-edits trigger instant reruns without requiring a restart.
+it inside the current Streamlit container. Files are watched for changes
+using modification time as the cache key.
 """
 
 from __future__ import annotations
@@ -17,19 +17,35 @@ from app.style import BORDER_SUBTLE, TEXT_FAINT
 _CONTENT_DIR = Path(__file__).resolve().parents[1] / "content"
 
 
+@st.cache_data(show_spinner=False)
+def _read_markdown_cached(filename: str, file_mtime: float) -> str:
+    """Read markdown file. Cache key includes mtime for auto-refresh on edits.
+
+    When file modification time changes, cache is invalidated and file is re-read.
+    """
+    path = _CONTENT_DIR / filename
+    if not path.exists():
+        return f"**Missing content file: {filename}**"
+    return path.read_text(encoding="utf-8")
+
+
 def _render_markdown(filename: str) -> None:
     """Read and render a markdown file from ``app/content/``.
 
-    Files are watched automatically by Streamlit. Edits to .md files trigger
-    an instant rerun and show updated content (no restart needed).
+    Edits to .md files automatically update the page when you save.
     """
     path = _CONTENT_DIR / filename
     if not path.exists():
         _placeholder_block(f"Missing content file: {filename}")
         return
 
-    # Read file fresh each render (no caching) so Streamlit detects changes
-    text = path.read_text(encoding="utf-8")
+    # Include file mtime in cache key; when file changes, cache is invalidated
+    try:
+        file_mtime = path.stat().st_mtime
+    except OSError:
+        file_mtime = 0
+
+    text = _read_markdown_cached(filename, file_mtime)
     st.markdown(text)
 
 
