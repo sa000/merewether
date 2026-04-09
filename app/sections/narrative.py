@@ -74,13 +74,13 @@ def _render_correlation_widget() -> None:
 
     st.markdown(
         f'<h4 style="color: {ACCENT}; font-weight: 700; margin: 1.5rem 0 0.5rem 0;">'
-        f'A small concrete example</h4>',
+        f'Short-Term Goals in Action</h4>',
         unsafe_allow_html=True,
     )
     st.markdown(
         f'<p style="color: {TEXT_DIM}; font-size: 14px; margin: 0 0 1rem 0;">'
-        f'Live: corn front-month futures (ZC=F) versus rolling 30-day '
-        f'Iowa precipitation. Updates whenever this page is opened.</p>',
+        f'Live: corn futures contract value versus rolling 30-day Iowa precipitation. '
+        f'Updates whenever this page is opened.</p>',
         unsafe_allow_html=True,
     )
 
@@ -95,8 +95,8 @@ def _render_correlation_widget() -> None:
         df=merged,
         left_col="corn_close",
         right_col="precip_30d_in",
-        left_title="Corn close (USc/bu)",
-        right_title="Iowa 30d precip (in)",
+        left_title="Corn contract value ($)",
+        right_title="Iowa rolling 30d precip (in)",
         title="Corn futures vs Iowa precipitation",
         height=340,
     )

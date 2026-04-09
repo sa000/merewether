@@ -202,7 +202,11 @@ def corn_weather_correlation() -> dict:
 
     # Pick a sensible close column
     close_col = "Close" if "Close" in corn.columns else corn.select_dtypes("number").columns[0]
-    corn_series = corn[close_col].rename("corn_close")
+    # Convert corn price per bushel to contract value (5,000 bushels per contract)
+    # Yahoo Finance reports ZC=F in cents per bushel, so divide by 100 then multiply by 5000
+    corn_price_cents = corn[close_col]
+    corn_contract_value = (corn_price_cents / 100) * 5000
+    corn_series = corn_contract_value.rename("corn_close")
 
     precip_30d = weather["precip_in"].rolling(window=30, min_periods=15).sum().rename("precip_30d_in")
 

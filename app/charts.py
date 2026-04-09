@@ -134,14 +134,14 @@ def dual_axis_line_chart(
         x=dates, y=df[left_col].tolist(),
         mode="lines", name=left_title,
         line=dict(color=ACCENT, width=2),
-        hovertemplate="%{x}<br>" + left_title + ": <b>%{y:,.2f}</b><extra></extra>",
+        hovertemplate="<b>%{x}</b><br>" + left_title + "<br><b>%{y:,.2f}</b><extra></extra>",
     ))
     fig.add_trace(go.Scatter(
         x=dates, y=df[right_col].tolist(),
         mode="lines", name=right_title,
         line=dict(color="#9ca3af", width=1.6, dash="dot"),
         yaxis="y2",
-        hovertemplate="%{x}<br>" + right_title + ": <b>%{y:,.2f}</b><extra></extra>",
+        hovertemplate="<b>%{x}</b><br>" + right_title + "<br><b>%{y:.2f}</b><extra></extra>",
     ))
     fig.update_layout(
         title=dict(text=title, font=dict(size=16, color=TEXT_PRIMARY), x=0.0, xanchor="left"),
