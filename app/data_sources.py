@@ -114,11 +114,8 @@ def fetch_yahoo(ticker: str, period: str = "5y") -> pd.DataFrame:
         if not filepath.exists():
             return pd.DataFrame()
 
-        df = pd.read_csv(filepath, index_col=0, parse_dates=True)
-        # Convert all numeric columns to float (CSV may have read them as strings)
-        numeric_cols = df.select_dtypes(include="object").columns
-        for col in numeric_cols:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
+        df = pd.read_csv(filepath, parse_dates=["Date"])
+        df = df.set_index("Date")
         return df
     except Exception:
         return pd.DataFrame()
