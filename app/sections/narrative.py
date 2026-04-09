@@ -66,29 +66,16 @@ def render_long_term() -> None:
 
 
 def _render_correlation_widget() -> None:
-    """A small live demo of the kind of project mentioned above."""
+    """Render the corn vs weather chart."""
     import streamlit as st
     from app.data_sources import corn_weather_correlation
     from app.charts import dual_axis_line_chart
-    from app.style import show_chart, ACCENT, TEXT_DIM
-
-    st.markdown(
-        f'<h4 style="color: {ACCENT}; font-weight: 700; margin: 1.5rem 0 0.5rem 0;">'
-        f'Short-Term Goals in Action</h4>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        f'<p style="color: {TEXT_DIM}; font-size: 14px; margin: 0 0 1rem 0;">'
-        f'Live: corn futures contract value versus rolling 30-day Iowa precipitation. '
-        f'Updates whenever this page is opened.</p>',
-        unsafe_allow_html=True,
-    )
+    from app.style import show_chart
 
     result = corn_weather_correlation()
     merged = result.get("merged_df")
     if merged is None or merged.empty:
-        st.caption("Live data temporarily unavailable. The correlation chart "
-                   "will return on the next refresh.")
+        st.caption("Live data temporarily unavailable.")
         return
 
     fig = dual_axis_line_chart(
@@ -101,18 +88,3 @@ def _render_correlation_widget() -> None:
         height=340,
     )
     show_chart(fig, height=340)
-
-    corr = result.get("correlation")
-    c1, c2 = st.columns([1, 3])
-    if corr is not None and corr == corr:  # NaN check
-        c1.metric("Trailing 1y Pearson r", f"{corr:+.2f}")
-    else:
-        c1.metric("Trailing 1y Pearson r", "—")
-    c2.markdown(
-        f'<p style="color: {TEXT_DIM}; font-size: 13px; margin-top: 0.5rem;">'
-        f'A single state and a single window — not predictive on its own. '
-        f'The point is to show the kind of small, concrete project I would '
-        f'start with: pull two free public sources, line them up on a date '
-        f'index, and compute one honest number.</p>',
-        unsafe_allow_html=True,
-    )
