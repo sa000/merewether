@@ -1,10 +1,9 @@
 """Trend Research section renderer.
 
-The user picks an asset (Apple or corn futures), a date window, and
-an optional question, and Claude Haiku with web search returns a
-research brief explaining what drove the price move during that
-window. Pre-filled buttons set the asset + window + question in one
-click and automatically run the analysis.
+Two hardcoded research examples with web search. Click an example to
+automatically run the analysis and see what drove the price move during
+that window. Each example demonstrates different data points and
+narratives to show the range of what's possible.
 """
 
 from __future__ import annotations
@@ -14,22 +13,14 @@ from datetime import date
 import streamlit as st
 
 from app import trend_analyst
-from app.data_sources import INVENTORY
 from app.sections import require_api_key
 from app.style import (
     ACCENT,
-    BG_CARD_SOLID,
     BORDER,
     TEXT_DIM,
     TEXT_PRIMARY,
-    TEXT_SECONDARY,
     card,
 )
-
-
-# Only the yfinance-backed assets get a meaningful research brief;
-# macro series don't have web-searchable price stories.
-_ELIGIBLE_KEYS = [k for k, v in INVENTORY.items() if v["source"] == "yahoo"]
 
 
 _PRESETS = [
@@ -38,39 +29,12 @@ _PRESETS = [
         "asset": "AAPL",
         "start": date(2023, 9, 1),
         "end": date(2023, 11, 1),
-        "question": (
-            "Why did Apple stock drop sharply between September and "
-            "early November 2023?"
-        ),
     },
     {
-        "label": "What drove corn higher in summer 2022?",
+        "label": "What drove corn futures higher in summer 2022?",
         "asset": "ZC=F",
         "start": date(2022, 4, 1),
         "end": date(2022, 7, 1),
-        "question": (
-            "What drove corn futures to a multi-year high in the spring "
-            "and early summer of 2022?"
-        ),
-    },
-    {
-        "label": "Corn during the 2012 US drought",
-        "asset": "ZC=F",
-        "start": date(2012, 6, 1),
-        "end": date(2012, 9, 1),
-        "question": (
-            "What happened to corn futures during the 2012 US drought, "
-            "and how did the USDA describe the damage?"
-        ),
-    },
-    {
-        "label": "Why did Apple rally in early 2024?",
-        "asset": "AAPL",
-        "start": date(2024, 1, 1),
-        "end": date(2024, 4, 1),
-        "question": (
-            "Why did Apple rally between January and early April 2024?"
-        ),
     },
 ]
 
@@ -80,36 +44,18 @@ def _intro() -> None:
         f"""
         <p style="color: {TEXT_PRIMARY}; font-size: 17px; line-height: 1.75;
                   margin: 0 0 1rem 0;">
-            Pick a name and a window, or click one of the suggested
-            examples to auto-run it. Claude searches the public web,
+            Click one of these examples. Claude searches the public web,
             collects the news and reports that explain the move, and
             returns a research brief with inline citations — the same
             shape as a research note an analyst might pull together
-            manually, except the model has already done the search.
+            manually.
         </p>
         """,
         unsafe_allow_html=True,
     )
 
 
-def _apply_preset(idx: int) -> None:
-    p = _PRESETS[idx]
-    # Use widget keys distinct from the form widget keys so the next
-    # rerun seeds defaults from these "_pending_" values.
-    st.session_state["trend_pending_asset"] = p["asset"]
-    st.session_state["trend_pending_start"] = p["start"]
-    st.session_state["trend_pending_end"] = p["end"]
-    st.session_state["trend_pending_question"] = p["question"]
-    st.session_state["trend_auto_run"] = True
-
-
 def _render_presets() -> None:
-    st.markdown(
-        f'<div style="color: {TEXT_DIM}; font-size: 12px; '
-        f'text-transform: uppercase; letter-spacing: 0.06em; '
-        f'margin: 0 0 0.5rem 0;">Try one of these</div>',
-        unsafe_allow_html=True,
-    )
     cols = st.columns(2)
     for i, preset in enumerate(_PRESETS):
         col = cols[i % 2]
@@ -118,59 +64,11 @@ def _render_presets() -> None:
             key=f"trend_preset_{i}",
             use_container_width=True,
         ):
-            _apply_preset(i)
+            st.session_state["trend_pending_asset"] = preset["asset"]
+            st.session_state["trend_pending_start"] = preset["start"]
+            st.session_state["trend_pending_end"] = preset["end"]
+            st.session_state["trend_auto_run"] = True
             st.rerun()
-
-
-def _render_form() -> tuple[str, date, date, str, bool]:
-    asset_default = st.session_state.pop(
-        "trend_pending_asset", _ELIGIBLE_KEYS[0]
-    )
-    if asset_default not in _ELIGIBLE_KEYS:
-        asset_default = _ELIGIBLE_KEYS[0]
-
-    start_default = st.session_state.pop(
-        "trend_pending_start", date(2023, 9, 1)
-    )
-    end_default = st.session_state.pop(
-        "trend_pending_end", date(2023, 11, 1)
-    )
-    question_default = st.session_state.pop(
-        "trend_pending_question",
-        "Why did this asset move during the selected window?",
-    )
-
-    asset_key = st.selectbox(
-        "Asset",
-        _ELIGIBLE_KEYS,
-        index=_ELIGIBLE_KEYS.index(asset_default),
-        format_func=lambda k: INVENTORY[k]["label"],
-        key="trend_asset_select",
-    )
-
-    c1, c2 = st.columns(2)
-    start = c1.date_input(
-        "Window start", value=start_default, key="trend_start_picker"
-    )
-    end = c2.date_input(
-        "Window end", value=end_default, key="trend_end_picker"
-    )
-
-    question = st.text_area(
-        "Question (optional context for the model)",
-        value=question_default,
-        height=80,
-        key="trend_question_textarea",
-    )
-
-    api_key = require_api_key()
-    submit = st.button(
-        "Run research",
-        type="primary",
-        disabled=(api_key is None or start >= end),
-        key="trend_submit",
-    )
-    return asset_key, start, end, question, submit
 
 
 def _render_result(result: dict) -> None:
@@ -248,9 +146,13 @@ def render() -> None:
     auto_run = st.session_state.pop("trend_auto_run", False)
 
     _render_presets()
-    asset_key, start, end, question, submit = _render_form()
 
-    if (submit or auto_run) and start < end:
+    # Pop pending state values set by a preset click
+    asset = st.session_state.pop("trend_pending_asset", None)
+    start = st.session_state.pop("trend_pending_start", None)
+    end = st.session_state.pop("trend_pending_end", None)
+
+    if (auto_run or asset is not None) and asset and start and end:
         api_key = require_api_key()
         if api_key is None:
             return
@@ -259,11 +161,9 @@ def render() -> None:
             "Researching with Claude (this may take 20-40 seconds)…"
         ):
             result = trend_analyst.analyze_trend(
-                asset_key=asset_key,
+                asset_key=asset,
                 start=start,
                 end=end,
                 api_key=api_key,
             )
         _render_result(result)
-    elif submit and start >= end:
-        st.error("Window start must be before window end.")

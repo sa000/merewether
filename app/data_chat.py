@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,11 @@ available?", "which sources cover macro data?", "what's the difference \
 between CPI and unemployment in this app?", "what would I use to research \
 inflation?".
 
+If the user asks "What is the size of this data and the date range?", \
+respond with a markdown table showing: Source | Frequency | First Date | \
+Last Date | Rows. Format the table in standard markdown syntax. Return only \
+the table, no other text.
+
 If asked something out of scope (predictions, financial advice, anything \
 not about the catalog), respond with:
 {{"answer": "I can only help with questions about the data sources in this \
@@ -41,14 +47,39 @@ RULES:
 - When listing sources, include the inventory key as well as the label so \
 the user can find them in the dropdown.
 - Keep answers concrete: at most ~120 words. Use plain text, no markdown \
-headings.
+headings (except for the metadata table which uses markdown).
 - Each source entry must have EXACTLY ONE inventory key.
 
 Respond with ONLY valid JSON (no markdown code fences):
-{{"answer": "Brief natural-language answer",
+{{"answer": "Brief natural-language answer or markdown table",
  "sources": [{{"key": "...", "label": "...", "asset_class": "..."}}]}}
 
 {context}"""
+
+
+def _build_metadata_table(inventory: dict) -> str:
+    """Build a markdown table with data sizes and date ranges."""
+    from app.data_sources import load_series
+
+    rows = [
+        "| Source | Frequency | First Date | Last Date | Rows |",
+        "|--------|-----------|-----------|----------|------|",
+    ]
+
+    for key, entry in inventory.items():
+        df, value_col = load_series(key)
+        label = entry.get("label", key)
+        frequency = entry.get("frequency", "unknown")
+
+        if df.empty:
+            rows.append(f"| {label} | {frequency} | — | — | 0 |")
+        else:
+            first_date = df.index[0].strftime("%Y-%m-%d") if hasattr(df.index[0], "strftime") else str(df.index[0])
+            last_date = df.index[-1].strftime("%Y-%m-%d") if hasattr(df.index[-1], "strftime") else str(df.index[-1])
+            row_count = len(df)
+            rows.append(f"| {label} | {frequency} | {first_date} | {last_date} | {row_count} |")
+
+    return "\n".join(rows)
 
 
 def ask(question: str, inventory_text: str, api_key: str) -> dict:
@@ -66,6 +97,12 @@ def ask(question: str, inventory_text: str, api_key: str) -> dict:
         returns a friendly fallback message and empty sources list.
     """
     import anthropic
+    from app.data_sources import INVENTORY
+
+    # Detect metadata query about data size and date range
+    if "size" in question.lower() and "date range" in question.lower():
+        table = _build_metadata_table(INVENTORY)
+        return {"answer": table, "sources": []}
 
     system = SYSTEM_PROMPT.format(context=inventory_text)
     client = anthropic.Anthropic(api_key=api_key)
