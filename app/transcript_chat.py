@@ -66,7 +66,7 @@ def _ask_cached(transcript_hash: str, question: str, api_key: str, transcript_te
 
 
 def ask(transcript_text: str, question: str, api_key: str) -> dict:
-    """Send a question grounded on a transcript (cached 24h).
+    """Send a question grounded on a transcript (cached 72-hour).
 
     Args:
         transcript_text: Full text of the earnings call transcript.

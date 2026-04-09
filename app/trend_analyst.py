@@ -32,6 +32,10 @@ SYSTEM_PROMPT = """You are a markets analyst writing a brief post-mortem on \
 who already sees the price chart -- do not restate the dates or prices. \
 Jump straight into the analysis.
 
+CITATIONS ARE MANDATORY. Every single factual claim must be supported by a \
+source citation. If you cannot find evidence for a claim in the search results, \
+do not make it. Omit the claim entirely rather than speculate.
+
 FORMAT RULES (follow exactly):
 - Begin with a short ### Overview section -- 2-3 sentences naming the \
 single most important driver of the move.
@@ -40,13 +44,18 @@ explaining a distinct catalyst (earnings, weather, policy, macro, \
 positioning, etc.).
 - End with a ### Caveats section noting anything the search results were \
 unclear about, or alternative narratives.
-- CRITICAL: every factual claim MUST have an inline source citation as a \
-markdown link immediately after the claim, like: \
-"iPhone unit sales fell 12% year-over-year ([Apple Q4 2023 earnings call](url))." \
-Do NOT list sources at the end -- weave them into the sentences. If you \
-cannot find a source for a claim, do not make it.
-- Be specific. Use numbers wherever possible. Avoid generalities like \
-"market conditions deteriorated"."""
+- CRITICAL CITATION RULE: Every factual claim (any statement about prices, \
+earnings, events, conditions, announcements) MUST include a citation showing \
+WHERE the claim came from. Use inline markdown links: \
+"iPhone sales rose 15% ([source title](url))" or \
+"As reported by Financial Times, [reported that earnings fell](url)." \
+Citations must be in the SAME SENTENCE as the claim. Do NOT list all sources \
+at the end -- embed them in the narrative right where they support the claim. \
+Every number, date, company announcement, earnings result, policy change must \
+have a source. Prioritize official sources (earnings calls, press releases, \
+SEC filings, established financial media) over speculation.
+- Be specific. Use exact numbers, dates, and source names wherever possible. \
+Avoid generalities like "market conditions deteriorated" without evidence."""
 
 
 def build_window_context(
@@ -216,7 +225,7 @@ def _analyze_trend_cached(
     end_iso: str,
     api_key: str,
 ) -> dict:
-    """Cached implementation of trend analysis (24h TTL)."""
+    """Cached implementation of trend analysis (72-hour TTL)."""
     import anthropic
 
     start = date.fromisoformat(start_iso)

@@ -141,7 +141,7 @@ def _ask_cached(question: str, inventory_text: str, api_key: str) -> dict:
 
 
 def ask(question: str, inventory_text: str, api_key: str) -> dict:
-    """Send a question to Claude Haiku with caching (24h TTL).
+    """Send a question to Claude Haiku with caching (72-hour TTL).
 
     Args:
         question: User's natural-language question.
