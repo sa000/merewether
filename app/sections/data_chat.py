@@ -89,11 +89,12 @@ def render() -> None:
 
     _render_preset_buttons()
 
-    default = st.session_state.get("data_chat_question", _DEFAULT_QUESTION)
+    default = st.session_state.get("data_chat_question", "")
     question = st.text_area(
         "Your question",
         value=default,
         height=100,
+        placeholder="Ask a question here",
         key="data_chat_textarea",
         label_visibility="collapsed",
     )
