@@ -88,35 +88,33 @@ INVENTORY: dict[str, dict] = {
 # ---------------------------------------------------------------------------
 # Fetchers
 # ---------------------------------------------------------------------------
-@st.cache_data(ttl=86_400, show_spinner=False)
+@st.cache_data(show_spinner=False)
 def fetch_yahoo(ticker: str, period: str = "5y") -> pd.DataFrame:
-    """Download OHLCV history from Yahoo Finance.
+    """Load OHLCV history from local CSV files.
 
-    Returns an empty DataFrame on any failure -- the caller is
-    responsible for showing a friendly message rather than crashing
-    the app. ``yfinance`` is wrapped because the underlying scraping
-    target changes occasionally.
+    Data is pre-downloaded and stored locally; no external API call.
+    Returns an empty DataFrame on any failure.
     """
-    try:
-        import yfinance as yf
+    from pathlib import Path
 
-        df = yf.download(
-            ticker,
-            period=period,
-            auto_adjust=True,
-            progress=False,
-            threads=False,
-        )
-        if df is None or df.empty:
+    # Map ticker to local CSV file
+    ticker_map = {
+        "AAPL": "aapl_5y.csv",
+        "ZC=F": "zc_2y.csv",
+    }
+
+    filename = ticker_map.get(ticker)
+    if not filename:
+        return pd.DataFrame()
+
+    try:
+        data_dir = Path(__file__).resolve().parents[1] / "app" / "data"
+        filepath = data_dir / filename
+
+        if not filepath.exists():
             return pd.DataFrame()
 
-        # yfinance >= 0.2.x returns a MultiIndex column for single-ticker
-        # downloads in some versions; flatten it.
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = [
-                c[0] if isinstance(c, tuple) else c for c in df.columns
-            ]
-        df.index = pd.to_datetime(df.index)
+        df = pd.read_csv(filepath, index_col=0, parse_dates=True)
         return df
     except Exception:
         return pd.DataFrame()
