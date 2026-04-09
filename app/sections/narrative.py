@@ -79,6 +79,13 @@ def render_short_term() -> None:
 
 def render_long_term() -> None:
     _render_markdown("long_term.md")
+    _render_data_explorer()
+
+
+def _render_data_explorer() -> None:
+    """Render the data explorer."""
+    from app.sections import data_explorer as data_explorer_section
+    data_explorer_section.render()
 
 
 def _render_correlation_widget() -> None:

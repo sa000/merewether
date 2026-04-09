@@ -29,7 +29,6 @@ from app.style import (  # noqa: E402
     TEXT_FAINT,
 )
 from app.sections import narrative  # noqa: E402
-from app.sections import data_explorer as data_explorer_section  # noqa: E402
 from app.sections import data_chat as data_chat_section  # noqa: E402
 from app.sections import trend_research as trend_research_section  # noqa: E402
 from app.sections import transcript as transcript_section  # noqa: E402
@@ -89,10 +88,9 @@ _TOC_ITEMS = [
     "1. Purpose",
     "2. Short-Term Goals",
     "3. Long-Term Goals",
-    "4. Data Explorer",
-    "5. AI Data Chat",
-    "6. Trend Research",
-    "7. Transcript Analysis",
+    "4. AI Data Chat",
+    "5. Trend Research",
+    "6. Transcript Analysis",
 ]
 
 
@@ -160,16 +158,13 @@ with st.expander("2. Short-Term Goals", expanded=False):
 with st.expander("3. Long-Term Goals", expanded=False):
     narrative.render_long_term()
 
-with st.expander("4. Data Explorer", expanded=False):
-    data_explorer_section.render()
-
-with st.expander("5. AI Data Chat", expanded=False):
+with st.expander("4. AI Data Chat", expanded=False):
     data_chat_section.render()
 
-with st.expander("6. Trend Research", expanded=False):
+with st.expander("5. Trend Research", expanded=False):
     trend_research_section.render()
 
-with st.expander("7. Transcript Analysis", expanded=False):
+with st.expander("6. Transcript Analysis", expanded=False):
     transcript_section.render()
 
 
