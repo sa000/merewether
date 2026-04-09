@@ -238,11 +238,12 @@ def render() -> None:
 
     _render_preset_buttons()
 
-    default = st.session_state.get("transcript_question", _DEFAULT_QUESTION)
+    default = st.session_state.get("transcript_question", "")
     question = st.text_area(
         "Your question",
         value=default,
         height=100,
+        placeholder="Ask a question here",
         key="transcript_textarea",
         label_visibility="collapsed",
     )

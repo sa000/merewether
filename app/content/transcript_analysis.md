@@ -1,1 +1,1 @@
-Pick an earnings call transcript and ask Claude about it. The model is grounded strictly on the transcript text — it will not pull in outside knowledge about the company. This is a stand-in for grounded Q&A over Merewether's internal transcript corpus, where an analyst should be able to interrogate a call in plain English instead of grepping a PDF.
+Pick an earnings call transcript and ask a question about it. The model is grounded strictly on the transcript text — it will not pull in outside knowledge about the company. 

@@ -1,1 +1,3 @@
-Click one of these examples to see how I would approach market research. Claude searches the public web, collects the news and reports that explain the move, and returns a research brief with inline citations — the same shape as a research note an analyst might pull together manually.
+Extending from above, users might ask where was there a drop/surge in period xxx. We could feed this into AI. Now by having a clean warehouse, we can ask AI in a smarter way by pre feeding it context and giving it more direction. The intention here is highlight sources an analyst might miss, even if the answer isnt 100% correct, as well as help Sakib to formulate use cases for AI. 
+
+I have massaged the prompt in the backend to include all this and to add sources so the analyst can dive deep. 

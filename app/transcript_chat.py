@@ -27,7 +27,11 @@ directly -- do not invent facts.
 
 Style:
 - Be concise: 2-5 short paragraphs at most.
-- Quote short excerpts (under 25 words) when they directly support a claim.
+- For every factual claim, include supporting evidence: direct quotes \
+(under 25 words), paraphrases with line references, or specific examples.
+- For summary questions, use bullet points for clarity.
+- For analysis questions (tone, risks, guidance, etc.), cite evidence \
+from the transcript to support your interpretation.
 - Do NOT use markdown headings; plain paragraphs are fine.
 
 TRANSCRIPT:
