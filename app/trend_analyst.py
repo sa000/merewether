@@ -18,6 +18,7 @@ import re
 from datetime import date
 
 import pandas as pd
+import streamlit as st
 
 from app.data_sources import INVENTORY, load_series
 
@@ -208,28 +209,18 @@ def parse_response(response) -> dict:
 # ---------------------------------------------------------------------------
 # Public entrypoint
 # ---------------------------------------------------------------------------
-def analyze_trend(
+@st.cache_data(ttl=86_400, show_spinner=False)
+def _analyze_trend_cached(
     asset_key: str,
-    start: date,
-    end: date,
+    start_iso: str,
+    end_iso: str,
     api_key: str,
 ) -> dict:
-    """Run an AI post-mortem on a single asset over a date window.
-
-    Args:
-        asset_key: Inventory key from ``data_sources.INVENTORY``
-            (only ``yahoo``-source assets are supported -- macro
-            series do not have web-searchable price stories).
-        start: Window start date.
-        end: Window end date.
-        api_key: Anthropic API key.
-
-    Returns:
-        Dict with ``narrative`` (str), ``sections`` (dict),
-        ``section_citations`` (dict), ``citations`` (list), and
-        ``error`` (str or None).
-    """
+    """Cached implementation of trend analysis (24h TTL)."""
     import anthropic
+
+    start = date.fromisoformat(start_iso)
+    end = date.fromisoformat(end_iso)
 
     if asset_key not in INVENTORY:
         return _error(f"Unknown asset: {asset_key}")
@@ -270,6 +261,33 @@ def analyze_trend(
     parsed["error"] = None
     parsed["price_summary"] = summary
     return parsed
+
+
+def analyze_trend(
+    asset_key: str,
+    start: date,
+    end: date,
+    api_key: str,
+) -> dict:
+    """Public entry point for trend analysis with caching.
+
+    Args:
+        asset_key: Inventory key from ``data_sources.INVENTORY``
+            (only ``yahoo``-source assets are supported).
+        start: Window start date.
+        end: Window end date.
+        api_key: Anthropic API key.
+
+    Returns:
+        Dict with ``narrative``, ``sections``, ``section_citations``,
+        ``citations``, ``price_summary``, and ``error``.
+    """
+    return _analyze_trend_cached(
+        asset_key=asset_key,
+        start_iso=start.isoformat(),
+        end_iso=end.isoformat(),
+        api_key=api_key,
+    )
 
 
 def _error(msg: str) -> dict:

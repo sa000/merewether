@@ -13,7 +13,9 @@ from __future__ import annotations
 
 import json
 import logging
+
 import pandas as pd
+import streamlit as st
 
 logger = logging.getLogger(__name__)
 
@@ -82,20 +84,9 @@ def _build_metadata_table(inventory: dict) -> str:
     return "\n".join(rows)
 
 
-def ask(question: str, inventory_text: str, api_key: str) -> dict:
-    """Send a question to Claude Haiku and return a structured result.
-
-    Args:
-        question: User's natural-language question.
-        inventory_text: Pre-built inventory text from
-            ``data_sources.build_inventory_text``.
-        api_key: Anthropic API key.
-
-    Returns:
-        Dict with ``answer`` (str) and ``sources``
-        (list of ``{key, label, asset_class}`` dicts). On API failure,
-        returns a friendly fallback message and empty sources list.
-    """
+@st.cache_data(ttl=86_400, show_spinner=False)
+def _ask_cached(question: str, inventory_text: str, api_key: str) -> dict:
+    """Cached implementation of data chat (24h TTL)."""
     import anthropic
     from app.data_sources import INVENTORY
 
@@ -147,3 +138,19 @@ def ask(question: str, inventory_text: str, api_key: str) -> dict:
         return result
     except (json.JSONDecodeError, TypeError):
         return {"answer": text or "(no response)", "sources": []}
+
+
+def ask(question: str, inventory_text: str, api_key: str) -> dict:
+    """Send a question to Claude Haiku with caching (24h TTL).
+
+    Args:
+        question: User's natural-language question.
+        inventory_text: Pre-built inventory text from
+            ``data_sources.build_inventory_text``.
+        api_key: Anthropic API key.
+
+    Returns:
+        Dict with ``answer`` (str) and ``sources`` (list). On API failure,
+        returns a friendly fallback message and empty sources list.
+    """
+    return _ask_cached(question=question, inventory_text=inventory_text, api_key=api_key)
