@@ -154,7 +154,7 @@ _render_toc()
 with st.expander("1. Purpose", expanded=False):
     narrative.render_why()
 
-with st.expander("2. Short-Term Goals (First 90 Days)", expanded=False):
+with st.expander("2. Short-Term Goals", expanded=False):
     narrative.render_short_term()
 
 with st.expander("3. Long-Term Goals", expanded=False):
