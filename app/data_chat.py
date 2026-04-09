@@ -33,10 +33,10 @@ available?", "which sources cover macro data?", "what's the difference \
 between CPI and unemployment in this app?", "what would I use to research \
 inflation?".
 
-If the user asks "What is the size of this data and the date range?", \
-respond with a markdown table showing: Source | Frequency | First Date | \
-Last Date | Rows. Format the table in standard markdown syntax. Return only \
-the table, no other text.
+If the user asks about the number of records, data size, or how many rows are \
+in each source, respond with a markdown table showing: Source | Frequency | \
+First Date | Last Date | Rows. Format the table in standard markdown syntax. \
+Return only the table, no other text.
 
 If asked something out of scope (predictions, financial advice, anything \
 not about the catalog), respond with:
@@ -84,14 +84,14 @@ def _build_metadata_table(inventory: dict) -> str:
     return "\n".join(rows)
 
 
-@st.cache_data(ttl=259_200, show_spinner=False)
 def _ask_cached(question: str, inventory_text: str, api_key: str) -> dict:
-    """Cached implementation of data chat (24h TTL)."""
+    """Implementation of data chat (cache disabled for now)."""
     import anthropic
     from app.data_sources import INVENTORY
 
-    # Detect metadata query about data size and date range
-    if "size" in question.lower() and "date range" in question.lower():
+    # Detect metadata query about records/size
+    q_lower = question.lower()
+    if any(term in q_lower for term in ["records", "size", "how many", "rows"]):
         table = _build_metadata_table(INVENTORY)
         return {"answer": table, "sources": []}
 
