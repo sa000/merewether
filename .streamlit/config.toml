@@ -8,6 +8,10 @@ font = "sans serif"
 
 [server]
 runOnSave = true
+fileWatcherType = "auto"
+
+[client]
+showErrorDetails = true
 
 [browser]
 gatherUsageStats = false

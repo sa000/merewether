@@ -1,8 +1,8 @@
 """Narrative section renderers.
 
 Each function reads a markdown file from ``app/content/`` and renders
-it inside the current Streamlit container. Files are watched for changes
-so edits auto-refresh without restarting the app.
+it inside the current Streamlit container. Files are watched automatically—
+edits trigger instant reruns without requiring a restart.
 """
 
 from __future__ import annotations
@@ -17,39 +17,19 @@ from app.style import BORDER_SUBTLE, TEXT_FAINT
 _CONTENT_DIR = Path(__file__).resolve().parents[1] / "content"
 
 
-@st.cache_data(show_spinner=False)
-def _read_cached_markdown(filename: str, file_mtime: float) -> str:
-    """Read markdown file with mtime-based cache invalidation.
-
-    When the file's modification time changes, the cache key changes and
-    the cached result is invalidated, triggering an app rerun.
-    """
-    path = _CONTENT_DIR / filename
-    if not path.exists():
-        return f"**Missing content file: {filename}**"
-    return path.read_text(encoding="utf-8")
-
-
 def _render_markdown(filename: str) -> None:
     """Read and render a markdown file from ``app/content/``.
 
-    Files are automatically watched. When you edit and save a .md file,
-    the app detects the change and reruns to display the updated content.
-    No restart needed.
+    Files are watched automatically by Streamlit. Edits to .md files trigger
+    an instant rerun and show updated content (no restart needed).
     """
     path = _CONTENT_DIR / filename
     if not path.exists():
         _placeholder_block(f"Missing content file: {filename}")
         return
 
-    # Get file modification time; when this changes, cache is invalidated
-    try:
-        file_mtime = path.stat().st_mtime
-    except OSError:
-        file_mtime = 0
-
-    # Cache key includes mtime, so file edits auto-invalidate the cache
-    text = _read_cached_markdown(filename, file_mtime)
+    # Read file fresh each render (no caching) so Streamlit detects changes
+    text = path.read_text(encoding="utf-8")
     st.markdown(text)
 
 
