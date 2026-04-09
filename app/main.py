@@ -76,11 +76,6 @@ def _render_hero() -> None:
                        font-size: 2.6rem; margin: 0; letter-spacing: -0.02em;">
                 Sakibul Alam
             </h1>
-            <p style="color: {TEXT_SECONDARY}; font-size: 1.05rem;
-                      margin: 0.6rem 0 0 0;">
-                A working proposal for the data scientist role at
-                Merewether Investment Management
-            </p>
         </div>
         """,
         unsafe_allow_html=True,
