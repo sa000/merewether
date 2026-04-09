@@ -115,6 +115,46 @@ def price_line_chart(
     return _apply_layout(fig, title, yaxis_title, height)
 
 
+def dual_axis_line_chart(
+    df: pd.DataFrame,
+    left_col: str,
+    right_col: str,
+    left_title: str,
+    right_title: str,
+    title: str,
+    height: int = 360,
+) -> go.Figure:
+    """Two-y-axis line chart. Left in ACCENT, right in muted gray."""
+    if df.empty:
+        return _apply_layout(go.Figure(), title, left_title, height)
+
+    dates = _dates(df.index)
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=dates, y=df[left_col].tolist(),
+        mode="lines", name=left_title,
+        line=dict(color=ACCENT, width=2),
+        hovertemplate="%{x}<br>" + left_title + ": <b>%{y:,.2f}</b><extra></extra>",
+    ))
+    fig.add_trace(go.Scatter(
+        x=dates, y=df[right_col].tolist(),
+        mode="lines", name=right_title,
+        line=dict(color="#9ca3af", width=1.6, dash="dot"),
+        yaxis="y2",
+        hovertemplate="%{x}<br>" + right_title + ": <b>%{y:,.2f}</b><extra></extra>",
+    ))
+    fig.update_layout(
+        title=dict(text=title, font=dict(size=16, color=TEXT_PRIMARY), x=0.0, xanchor="left"),
+        height=height,
+        yaxis=dict(title=left_title, gridcolor=BORDER, zeroline=False),
+        yaxis2=dict(title=right_title, overlaying="y", side="right", showgrid=False),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        **{k: v for k, v in LAYOUT_DEFAULTS.items() if k not in ("yaxis",)},
+    )
+    fig.update_xaxes(nticks=10, tickformat="%b %Y")
+    return fig
+
+
 def summary_stats(df: pd.DataFrame, value_col: str) -> dict:
     """Return summary statistics for a numeric series.
 

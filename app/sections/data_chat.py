@@ -55,6 +55,7 @@ def _render_preset_buttons() -> None:
     for col, q in zip(cols, _PRESET_QUESTIONS):
         if col.button(q, key=f"preset_{hash(q) & 0xffffffff}", use_container_width=True):
             st.session_state["data_chat_question"] = q
+            st.session_state["data_chat_auto_run"] = True
             st.rerun()
 
 
@@ -99,6 +100,9 @@ def render() -> None:
     _intro()
     api_key = require_api_key()
 
+    # Pop the auto-run flag set by a preset button click on the previous run.
+    auto_run = st.session_state.pop("data_chat_auto_run", False)
+
     _render_preset_buttons()
 
     default = st.session_state.get("data_chat_question", _DEFAULT_QUESTION)
@@ -111,13 +115,13 @@ def render() -> None:
     )
 
     submit = st.button(
-        "Ask Claude",
+        "Ask",
         type="primary",
         disabled=(api_key is None or not question.strip()),
         key="data_chat_submit",
     )
 
-    if submit and api_key and question.strip():
+    if (submit or auto_run) and api_key and question.strip():
         with st.spinner("Thinking…"):
             result = data_chat.ask(
                 question=question.strip(),

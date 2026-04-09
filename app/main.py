@@ -1,8 +1,8 @@
 """Merewether Investment -- Streamlit pitch app entry point.
 
-Single-page layout with a hero, table of contents, and ten collapsible
-sections (four narrative, three interactive, one placeholder, plus a
-footer). Run with ``streamlit run app/main.py``.
+Single-page layout with a hero, table of contents, and seven collapsible
+sections (three narrative, three interactive, one transcript demo, plus
+a footer). Run with ``streamlit run app/main.py``.
 """
 
 import base64
@@ -31,7 +31,8 @@ from app.style import (  # noqa: E402
 from app.sections import narrative  # noqa: E402
 from app.sections import data_explorer as data_explorer_section  # noqa: E402
 from app.sections import data_chat as data_chat_section  # noqa: E402
-from app.sections import trend_postmortem as trend_postmortem_section  # noqa: E402
+from app.sections import trend_research as trend_research_section  # noqa: E402
+from app.sections import transcript as transcript_section  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -43,7 +44,7 @@ st.set_page_config(
     page_title="Merewether Investment | Data Science Proposal",
     page_icon=str(_LOGO_PATH) if _LOGO_PATH.exists() else None,
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 inject_css()
@@ -71,8 +72,8 @@ def _render_hero() -> None:
                         margin-bottom: 0.6rem;">
                 Data Science Proposal
             </div>
-            <h1 style="color: {TEXT_PRIMARY}; font-weight: 600;
-                       font-size: 2.4rem; margin: 0; letter-spacing: -0.02em;">
+            <h1 style="color: {TEXT_PRIMARY}; font-weight: 700;
+                       font-size: 2.6rem; margin: 0; letter-spacing: -0.02em;">
                 Sakibul Alam
             </h1>
             <p style="color: {TEXT_SECONDARY}; font-size: 1.05rem;
@@ -90,14 +91,13 @@ def _render_hero() -> None:
 # Table of contents
 # ---------------------------------------------------------------------------
 _TOC_ITEMS = [
-    "1. About Me",
-    "2. Why I'm Building This",
-    "3. Short-Term Goals",
-    "4. Long-Term Goals",
-    "5. Data Explorer",
-    "6. AI Data Chat",
-    "7. AI Trend Post-Mortem",
-    "8. Transcript Call Analysis",
+    "1. Why I'm Building This",
+    "2. Short-Term Goals",
+    "3. Long-Term Goals",
+    "4. Data Explorer",
+    "5. AI Data Chat",
+    "6. Trend Research",
+    "7. Transcript Analysis",
 ]
 
 
@@ -156,29 +156,26 @@ _render_toc()
 
 
 # Sections
-with st.expander("1. About Me", expanded=False):
-    narrative.render_about()
-
-with st.expander("2. Why I'm Building This", expanded=False):
+with st.expander("1. Why I'm Building This", expanded=False):
     narrative.render_why()
 
-with st.expander("3. Short-Term Goals (First 90 Days)", expanded=False):
+with st.expander("2. Short-Term Goals (First 90 Days)", expanded=False):
     narrative.render_short_term()
 
-with st.expander("4. Long-Term Goals", expanded=False):
+with st.expander("3. Long-Term Goals", expanded=False):
     narrative.render_long_term()
 
-with st.expander("5. Data Explorer", expanded=False):
+with st.expander("4. Data Explorer", expanded=False):
     data_explorer_section.render()
 
-with st.expander("6. AI Data Chat", expanded=False):
+with st.expander("5. AI Data Chat", expanded=False):
     data_chat_section.render()
 
-with st.expander("7. AI Trend Post-Mortem", expanded=False):
-    trend_postmortem_section.render()
+with st.expander("6. Trend Research", expanded=False):
+    trend_research_section.render()
 
-with st.expander("8. Transcript Call Analysis", expanded=False):
-    narrative.render_transcript_placeholder()
+with st.expander("7. Transcript Analysis", expanded=False):
+    transcript_section.render()
 
 
 _render_footer()

@@ -1,9 +1,10 @@
-"""AI Trend Post-Mortem section renderer.
+"""Trend Research section renderer.
 
 The user picks an asset (Apple or corn futures), a date window, and
 an optional question, and Claude Haiku with web search returns a
-narrative explaining what drove the price move during that window.
-Pre-filled buttons set the asset + window + question in one click.
+research brief explaining what drove the price move during that
+window. Pre-filled buttons set the asset + window + question in one
+click and automatically run the analysis.
 """
 
 from __future__ import annotations
@@ -26,7 +27,7 @@ from app.style import (
 )
 
 
-# Only the yfinance-backed assets are eligible for trend post-mortem;
+# Only the yfinance-backed assets get a meaningful research brief;
 # macro series don't have web-searchable price stories.
 _ELIGIBLE_KEYS = [k for k, v in INVENTORY.items() if v["source"] == "yahoo"]
 
@@ -77,14 +78,14 @@ _PRESETS = [
 def _intro() -> None:
     st.markdown(
         f"""
-        <p style="color: {TEXT_PRIMARY}; font-size: 16px; line-height: 1.7;
+        <p style="color: {TEXT_PRIMARY}; font-size: 17px; line-height: 1.75;
                   margin: 0 0 1rem 0;">
-            Pick a name and a window. Claude searches the public web,
+            Pick a name and a window, or click one of the suggested
+            examples to auto-run it. Claude searches the public web,
             collects the news and reports that explain the move, and
-            returns a brief with inline citations. Same shape as a
-            quick research note an analyst might pull together
-            manually — except the model has already done the search,
-            so the analyst gets to start from a draft.
+            returns a research brief with inline citations — the same
+            shape as a research note an analyst might pull together
+            manually, except the model has already done the search.
         </p>
         """,
         unsafe_allow_html=True,
@@ -93,10 +94,13 @@ def _intro() -> None:
 
 def _apply_preset(idx: int) -> None:
     p = _PRESETS[idx]
-    st.session_state["trend_asset"] = p["asset"]
-    st.session_state["trend_start"] = p["start"]
-    st.session_state["trend_end"] = p["end"]
-    st.session_state["trend_question"] = p["question"]
+    # Use widget keys distinct from the form widget keys so the next
+    # rerun seeds defaults from these "_pending_" values.
+    st.session_state["trend_pending_asset"] = p["asset"]
+    st.session_state["trend_pending_start"] = p["start"]
+    st.session_state["trend_pending_end"] = p["end"]
+    st.session_state["trend_pending_question"] = p["question"]
+    st.session_state["trend_auto_run"] = True
 
 
 def _render_presets() -> None:
@@ -119,14 +123,20 @@ def _render_presets() -> None:
 
 
 def _render_form() -> tuple[str, date, date, str, bool]:
-    asset_default = st.session_state.get("trend_asset", _ELIGIBLE_KEYS[0])
+    asset_default = st.session_state.pop(
+        "trend_pending_asset", _ELIGIBLE_KEYS[0]
+    )
     if asset_default not in _ELIGIBLE_KEYS:
         asset_default = _ELIGIBLE_KEYS[0]
 
-    start_default = st.session_state.get("trend_start", date(2023, 9, 1))
-    end_default = st.session_state.get("trend_end", date(2023, 11, 1))
-    question_default = st.session_state.get(
-        "trend_question",
+    start_default = st.session_state.pop(
+        "trend_pending_start", date(2023, 9, 1)
+    )
+    end_default = st.session_state.pop(
+        "trend_pending_end", date(2023, 11, 1)
+    )
+    question_default = st.session_state.pop(
+        "trend_pending_question",
         "Why did this asset move during the selected window?",
     )
 
@@ -139,8 +149,12 @@ def _render_form() -> tuple[str, date, date, str, bool]:
     )
 
     c1, c2 = st.columns(2)
-    start = c1.date_input("Window start", value=start_default, key="trend_start_picker")
-    end = c2.date_input("Window end", value=end_default, key="trend_end_picker")
+    start = c1.date_input(
+        "Window start", value=start_default, key="trend_start_picker"
+    )
+    end = c2.date_input(
+        "Window end", value=end_default, key="trend_end_picker"
+    )
 
     question = st.text_area(
         "Question (optional context for the model)",
@@ -151,7 +165,7 @@ def _render_form() -> tuple[str, date, date, str, bool]:
 
     api_key = require_api_key()
     submit = st.button(
-        "Run post-mortem",
+        "Run research",
         type="primary",
         disabled=(api_key is None or start >= end),
         key="trend_submit",
@@ -229,21 +243,21 @@ def _render_result(result: dict) -> None:
 
 def render() -> None:
     _intro()
+
+    # Pop the auto-run flag set by a preset button click on the previous run.
+    auto_run = st.session_state.pop("trend_auto_run", False)
+
     _render_presets()
     asset_key, start, end, question, submit = _render_form()
 
-    if submit:
+    if (submit or auto_run) and start < end:
         api_key = require_api_key()
         if api_key is None:
             return
-        if start >= end:
-            st.error("Window start must be before window end.")
-            return
 
-        # Stash the question into the user message via the SDK wrapper.
-        # The SDK function builds its own context from numeric anchors;
-        # we append the user question for clarity.
-        with st.spinner("Researching with Claude (this may take 20-40 seconds)…"):
+        with st.spinner(
+            "Researching with Claude (this may take 20-40 seconds)…"
+        ):
             result = trend_analyst.analyze_trend(
                 asset_key=asset_key,
                 start=start,
@@ -251,3 +265,5 @@ def render() -> None:
                 api_key=api_key,
             )
         _render_result(result)
+    elif submit and start >= end:
+        st.error("Window start must be before window end.")

@@ -69,8 +69,8 @@ CUSTOM_CSS = f"""
     .stApp {{
         background-color: {BG_PAGE};
         font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-        font-size: 17px;
-        line-height: 1.7;
+        font-size: 18px;
+        line-height: 1.75;
         color: {TEXT_PRIMARY};
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
@@ -93,23 +93,31 @@ CUSTOM_CSS = f"""
         font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
     }}
 
-    /* --- Body text: 17px, near-black, comfortable line-height --- */
-    .block-container .stMarkdown p,
+    /* --- Body text: 18px, near-black, comfortable line-height --- */
+    .block-container .stMarkdown p {{
+        color: {TEXT_PRIMARY};
+        font-size: 18px;
+        line-height: 1.75;
+        font-weight: 400;
+        margin-bottom: 1rem;
+    }}
     .block-container .stMarkdown li {{
         color: {TEXT_PRIMARY};
-        font-size: 17px;
+        font-size: 18px;
         line-height: 1.7;
         font-weight: 400;
+        margin-bottom: 0.55rem;
     }}
     .block-container .stMarkdown strong,
     .block-container .stMarkdown b {{
         font-weight: 700;
-        color: {TEXT_PRIMARY};
+        color: {ACCENT};
     }}
     .block-container .stMarkdown h2,
     .block-container .stMarkdown h3,
     .block-container .stMarkdown h4 {{
         color: {ACCENT};
+        font-weight: 700;
     }}
     .block-container .stMarkdown pre,
     .block-container .stMarkdown code,
@@ -131,34 +139,37 @@ CUSTOM_CSS = f"""
     /* --- Headings --- */
     .block-container h1 {{
         color: {TEXT_PRIMARY};
-        font-size: 1.9rem;
-        font-weight: 600;
+        font-size: 2.2rem;
+        font-weight: 700;
         line-height: 1.2;
         letter-spacing: -0.02em;
         margin-bottom: 0.5rem;
     }}
     .block-container h2 {{
-        color: {TEXT_PRIMARY};
-        font-size: 1.6rem;
-        font-weight: 600;
+        color: {ACCENT};
+        font-size: 1.8rem;
+        font-weight: 700;
         line-height: 1.25;
         letter-spacing: -0.01em;
         margin-top: 2rem;
+        margin-bottom: 0.6rem;
     }}
     .block-container h3 {{
-        color: {TEXT_PRIMARY};
-        font-size: 1.25rem;
-        font-weight: 600;
+        color: {ACCENT};
+        font-size: 1.4rem;
+        font-weight: 700;
         line-height: 1.3;
-        border-bottom: 1px solid {BORDER};
+        border-bottom: 2px solid {ACCENT};
         padding-bottom: 8px;
-        margin-top: 1.5rem;
+        margin-top: 1.75rem;
+        margin-bottom: 0.75rem;
     }}
     .block-container h4 {{
-        color: {TEXT_PRIMARY};
-        font-size: 1.05rem;
-        font-weight: 600;
+        color: {ACCENT};
+        font-size: 1.15rem;
+        font-weight: 700;
         line-height: 1.35;
+        margin-top: 1.25rem;
     }}
 
     /* --- Sidebar --- */
@@ -223,28 +234,40 @@ CUSTOM_CSS = f"""
     /* --- Expander --- */
     [data-testid="stExpander"] {{
         border: 1px solid {BORDER} !important;
+        border-left: 4px solid {ACCENT} !important;
         border-radius: 8px !important;
         background: {BG_CARD_SOLID} !important;
-        margin-bottom: 8px !important;
+        margin-bottom: 10px !important;
+        transition: box-shadow 0.2s ease;
+    }}
+    [data-testid="stExpander"]:hover {{
+        box-shadow: 0 2px 10px rgba(26, 35, 50, 0.06);
     }}
     [data-testid="stExpander"] details summary {{
-        font-size: 16px !important;
-        font-weight: 600 !important;
+        font-size: 18px !important;
+        font-weight: 700 !important;
         color: {TEXT_PRIMARY} !important;
-        padding: 14px 18px !important;
+        padding: 16px 20px !important;
+        letter-spacing: -0.005em;
     }}
     [data-testid="stExpander"] details summary:hover {{
         color: {ACCENT} !important;
         background: {BG_CARD};
     }}
     [data-testid="stExpander"] svg {{
-        color: {TEXT_DIM} !important;
+        color: {ACCENT} !important;
     }}
-    [data-testid="stExpander"] .stMarkdown p,
+    [data-testid="stExpander"] .stMarkdown p {{
+        color: {TEXT_PRIMARY} !important;
+        font-size: 17px;
+        line-height: 1.75;
+        margin-bottom: 1rem;
+    }}
     [data-testid="stExpander"] .stMarkdown li {{
         color: {TEXT_PRIMARY} !important;
-        font-size: 16px;
+        font-size: 17px;
         line-height: 1.7;
+        margin-bottom: 0.55rem;
     }}
 
     /* --- Buttons --- */

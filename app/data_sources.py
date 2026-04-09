@@ -123,6 +123,111 @@ def fetch_yahoo(ticker: str, period: str = "5y") -> pd.DataFrame:
 
 
 @st.cache_data(ttl=86_400, show_spinner=False)
+def fetch_open_meteo(
+    latitude: float,
+    longitude: float,
+    start_date: str,
+    end_date: str,
+) -> pd.DataFrame:
+    """Fetch daily temperature and precipitation from Open-Meteo's free archive API.
+
+    Returns a DataFrame indexed by date with columns:
+        - precip_in (precipitation in inches)
+        - temp_max_f (max temperature in Fahrenheit)
+        - temp_min_f (min temperature in Fahrenheit)
+
+    Returns empty DataFrame on any failure (no API key required for the
+    archive endpoint).
+    """
+    try:
+        url = "https://archive-api.open-meteo.com/v1/archive"
+        params = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "start_date": start_date,
+            "end_date": end_date,
+            "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum",
+            "timezone": "America/Chicago",
+        }
+        resp = requests.get(url, params=params, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        daily = data.get("daily") or {}
+        if not daily.get("time"):
+            return pd.DataFrame()
+        df = pd.DataFrame({
+            "date": pd.to_datetime(daily["time"]),
+            "temp_max_f": [t * 9 / 5 + 32 if t is not None else None for t in daily.get("temperature_2m_max", [])],
+            "temp_min_f": [t * 9 / 5 + 32 if t is not None else None for t in daily.get("temperature_2m_min", [])],
+            "precip_in": [p / 25.4 if p is not None else None for p in daily.get("precipitation_sum", [])],
+        })
+        df = df.set_index("date")
+        return df
+    except Exception:
+        return pd.DataFrame()
+
+
+def corn_weather_correlation() -> dict:
+    """Compute the trailing-1y correlation between corn futures and Iowa
+    rolling-30d precipitation.
+
+    Returns:
+        Dict with:
+        - correlation: float (Pearson) over the trailing ~252 trading days,
+          NaN if insufficient data
+        - merged_df: DataFrame indexed by date with columns
+          ['corn_close', 'precip_30d_in']
+        - rolling_corr_df: DataFrame indexed by date with column
+          'rolling_corr_60d' (60-trading-day rolling correlation)
+        - start_date: ISO date string of the merged window start
+        - end_date: ISO date string of the merged window end
+        Empty values on failure.
+    """
+    from datetime import date, timedelta
+
+    end = date.today()
+    start = end - timedelta(days=2 * 365)
+
+    corn = fetch_yahoo("ZC=F", period="2y")
+    if corn.empty:
+        return {"correlation": float("nan"), "merged_df": pd.DataFrame(),
+                "rolling_corr_df": pd.DataFrame(),
+                "start_date": "", "end_date": ""}
+
+    weather = fetch_open_meteo(41.59, -93.62, start.isoformat(), end.isoformat())
+    if weather.empty:
+        return {"correlation": float("nan"), "merged_df": pd.DataFrame(),
+                "rolling_corr_df": pd.DataFrame(),
+                "start_date": "", "end_date": ""}
+
+    # Pick a sensible close column
+    close_col = "Close" if "Close" in corn.columns else corn.select_dtypes("number").columns[0]
+    corn_series = corn[close_col].rename("corn_close")
+
+    precip_30d = weather["precip_in"].rolling(window=30, min_periods=15).sum().rename("precip_30d_in")
+
+    merged = pd.concat([corn_series, precip_30d], axis=1, join="inner").dropna()
+    if merged.empty or len(merged) < 30:
+        return {"correlation": float("nan"), "merged_df": merged,
+                "rolling_corr_df": pd.DataFrame(),
+                "start_date": "", "end_date": ""}
+
+    trailing = merged.tail(252)
+    correlation = float(trailing["corn_close"].corr(trailing["precip_30d_in"]))
+
+    rolling_corr = merged["corn_close"].rolling(60, min_periods=30).corr(merged["precip_30d_in"])
+    rolling_corr_df = rolling_corr.dropna().to_frame("rolling_corr_60d")
+
+    return {
+        "correlation": correlation,
+        "merged_df": merged,
+        "rolling_corr_df": rolling_corr_df,
+        "start_date": merged.index[0].strftime("%Y-%m-%d"),
+        "end_date": merged.index[-1].strftime("%Y-%m-%d"),
+    }
+
+
+@st.cache_data(ttl=86_400, show_spinner=False)
 def fetch_fred(series_id: str) -> pd.DataFrame:
     """Download a FRED series as a DataFrame.
 

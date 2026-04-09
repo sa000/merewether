@@ -1,7 +1,0 @@
-I am a data scientist with a background in Python, SQL, and cloud infrastructure, focused on the parts of the job that tend to get less attention: data quality, reproducibility, and the plumbing that makes models actually run in production. My training is in statistics and machine learning, but the work I am proudest of has usually been less about novel algorithms and more about taking a messy, real process and making it observable, testable, and faster.
-
-Previously at [firm], I worked on systems that handled financial and time-series data — pricing feeds, transaction records, and a handful of alternative sources (web-scraped, vendor, and unstructured text). I have built ETL pipelines that other people on the team trusted enough to depend on, and I have written enough production code to know where things break and how to keep them from breaking the same way twice.
-
-What draws me to Merewether specifically is the chance to build a data science function from scratch at a firm that, from the outside, clearly values craft over flash. There is a meaningful difference between joining a team where data work is already a hundred dashboards deep and joining one where the first decisions are still being made — about what to measure, what to ignore, and what to invest in. I would rather do the second well than the first incrementally.
-
-If hired, my goal is to bring engineering rigor to the investment process — small, durable improvements that compound rather than impressive-sounding projects that do not survive contact with the next quarter.

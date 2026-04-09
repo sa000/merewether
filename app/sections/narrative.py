@@ -50,22 +50,67 @@ def _placeholder_block(label: str) -> None:
 # ---------------------------------------------------------------------------
 # Public renderers
 # ---------------------------------------------------------------------------
-def render_about() -> None:
-    _render_markdown("about.md")
-
-
 def render_why() -> None:
     _render_markdown("why.md")
 
 
 def render_short_term() -> None:
     _render_markdown("short_term.md")
+    _render_correlation_widget()
 
 
 def render_long_term() -> None:
     _render_markdown("long_term.md")
 
 
-def render_transcript_placeholder() -> None:
-    _render_markdown("transcript_placeholder.md")
-    _placeholder_block("Transcript analyzer — coming soon")
+def _render_correlation_widget() -> None:
+    """A small live demo of the kind of project mentioned above."""
+    import streamlit as st
+    from app.data_sources import corn_weather_correlation
+    from app.charts import dual_axis_line_chart
+    from app.style import show_chart, ACCENT, TEXT_DIM
+
+    st.markdown(
+        f'<h4 style="color: {ACCENT}; font-weight: 700; margin: 1.5rem 0 0.5rem 0;">'
+        f'A small concrete example</h4>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f'<p style="color: {TEXT_DIM}; font-size: 14px; margin: 0 0 1rem 0;">'
+        f'Live: corn front-month futures (ZC=F) versus rolling 30-day '
+        f'Iowa precipitation. Updates whenever this page is opened.</p>',
+        unsafe_allow_html=True,
+    )
+
+    result = corn_weather_correlation()
+    merged = result.get("merged_df")
+    if merged is None or merged.empty:
+        st.caption("Live data temporarily unavailable. The correlation chart "
+                   "will return on the next refresh.")
+        return
+
+    fig = dual_axis_line_chart(
+        df=merged,
+        left_col="corn_close",
+        right_col="precip_30d_in",
+        left_title="Corn close (USc/bu)",
+        right_title="Iowa 30d precip (in)",
+        title="Corn futures vs Iowa precipitation",
+        height=340,
+    )
+    show_chart(fig, height=340)
+
+    corr = result.get("correlation")
+    c1, c2 = st.columns([1, 3])
+    if corr is not None and corr == corr:  # NaN check
+        c1.metric("Trailing 1y Pearson r", f"{corr:+.2f}")
+    else:
+        c1.metric("Trailing 1y Pearson r", "—")
+    c2.markdown(
+        f'<p style="color: {TEXT_DIM}; font-size: 13px; margin-top: 0.5rem;">'
+        f'A single state and a single window — not predictive on its own. '
+        f'The point is to show the kind of small, concrete project I would '
+        f'start with: pull two free public sources, line them up on a date '
+        f'index, and compute one honest number.</p>',
+        unsafe_allow_html=True,
+    )
