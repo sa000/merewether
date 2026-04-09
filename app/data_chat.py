@@ -84,7 +84,7 @@ def _build_metadata_table(inventory: dict) -> str:
     return "\n".join(rows)
 
 
-@st.cache_data(ttl=86_400, show_spinner=False)
+@st.cache_data(ttl=259_200, show_spinner=False)
 def _ask_cached(question: str, inventory_text: str, api_key: str) -> dict:
     """Cached implementation of data chat (24h TTL)."""
     import anthropic

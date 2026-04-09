@@ -209,7 +209,7 @@ def parse_response(response) -> dict:
 # ---------------------------------------------------------------------------
 # Public entrypoint
 # ---------------------------------------------------------------------------
-@st.cache_data(ttl=86_400, show_spinner=False)
+@st.cache_data(ttl=259_200, show_spinner=False)
 def _analyze_trend_cached(
     asset_key: str,
     start_iso: str,

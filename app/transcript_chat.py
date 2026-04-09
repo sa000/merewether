@@ -34,7 +34,7 @@ TRANSCRIPT:
 {transcript}"""
 
 
-@st.cache_data(ttl=86_400, show_spinner=False)
+@st.cache_data(ttl=259_200, show_spinner=False)
 def _ask_cached(transcript_hash: str, question: str, api_key: str, transcript_text: str) -> dict:
     """Cached implementation of transcript Q&A (24h TTL)."""
     import anthropic
