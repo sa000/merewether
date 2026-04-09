@@ -87,13 +87,6 @@ def _build_metadata_table(inventory: dict) -> str:
 def _ask_cached(question: str, inventory_text: str, api_key: str) -> dict:
     """Implementation of data chat (cache disabled for now)."""
     import anthropic
-    from app.data_sources import INVENTORY
-
-    # Detect metadata query about records/size
-    q_lower = question.lower()
-    if any(term in q_lower for term in ["records", "size", "how many", "rows"]):
-        table = _build_metadata_table(INVENTORY)
-        return {"answer": table, "sources": []}
 
     system = SYSTEM_PROMPT.format(context=inventory_text)
     client = anthropic.Anthropic(api_key=api_key)
