@@ -91,7 +91,7 @@ def _render_hero() -> None:
 # Table of contents
 # ---------------------------------------------------------------------------
 _TOC_ITEMS = [
-    "1. Why I'm Building This",
+    "1. Purpose",
     "2. Short-Term Goals",
     "3. Long-Term Goals",
     "4. Data Explorer",
@@ -156,7 +156,7 @@ _render_toc()
 
 
 # Sections
-with st.expander("1. Why I'm Building This", expanded=False):
+with st.expander("1. Purpose", expanded=False):
     narrative.render_why()
 
 with st.expander("2. Short-Term Goals (First 90 Days)", expanded=False):
